@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.png" type="image/png">
+  <title>Cronometro & Countdown</title>
+  <style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* niente scroll */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: url('sfondo.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+header {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+header img {
+  max-width: 90px;
+  height: auto;
+}
+
+.container {
+  background: rgba(51, 51, 51, 0.92);
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  width: 90%;
+  max-width: 380px;
+  
+  /* RIMOSSO: flex:1 */
+  /* RIMOSSO: display:flex */
+  /* RIMOSSO: overflow:hidden */
+  
+  box-sizing: border-box;
+}
+
+
+    h1 {
+      text-align: center;
+      color: yellow;
+      margin: 4px 0 8px 0;
+      font-size: 1.2rem;
+    }
+
+    .block {
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #2b2b2b;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .time-display {
+      font-size: 1.6rem;
+      text-align: center;
+      margin: 6px 0 10px;
+      letter-spacing: 2px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 6px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .start-btn {
+      background: #4caf50;
+      color: white;
+    }
+
+    .stop-btn {
+      background: #f44336;
+      color: white;
+    }
+
+    .reset-btn {
+      background: #9e9e9e;
+      color: white;
+    }
+
+    .countdown-inputs {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #777;
+      background: #1f1f1f;
+      color: #f5f5f5;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #ffeb3b;
+      min-height: 1.2em;
+    }
+
+    /* Piccolo miglioramento se aperta su schermo un po' più grande */
+    @media (min-height: 700px) {
+      .container {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo" />
+  </header>
+
+  <div class="container">
+    <h1>Cronometro & Countdown</h1>
+
+    <!-- CRONOMETRO -->
+    <div class="block">
+      <div class="title">Cronometro</div>
+      <div id="stopwatchDisplay" class="time-display">00:00.00</div>
+      <div class="controls">
+        <button id="stopwatchStart" class="start-btn">Start</button>
+        <button id="stopwatchStop" class="stop-btn">Stop</button>
+        <button id="stopwatchReset" class="reset-btn">Reset</button>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN -->
+    <div class="block">
+      <div class="title">Countdown</div>
+
+      <div class="countdown-inputs">
+        <label for="countdownMinutes">Minuti:</label>
+        <input type="number" id="countdownMinutes" value="5" min="0" step="1">
+      </div>
+
+      <div id="countdownDisplay" class="time-display">05:00</div>
+
+      <div class="controls">
+        <button id="countdownStart" class="start-btn">Start</button>
+        <button id="countdownStop" class="stop-btn">Stop</button>
+        <button id="countdownReset" class="reset-btn">Reset</button>
+      </div>
+
+      <div id="countdownMessage" class="message"></div>
+    </div>
+  </div>
+
+  <!-- Audio per la musichetta finale -->
+  <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
+
+  <script>
+    /* =======================
+       CRONOMETRO
+       ======================= */
+    let stopwatchInterval = null;
+    let stopwatchStartTime = null;
+    let stopwatchElapsed = 0; // millisecondi già trascorsi
+
+    const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+    const stopwatchStartBtn = document.getElementById('stopwatchStart');
+    const stopwatchStopBtn = document.getElementById('stopwatchStop');
+    const stopwatchResetBtn = document.getElementById('stopwatchReset');
+
+    function formatStopwatchTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const centiseconds = Math.floor((ms % 1000) / 10);
+
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      const cc = String(centiseconds).padStart(2, '0');
+
+      return `${mm}:${ss}.${cc}`;
+    }
+
+    function updateStopwatch() {
+      const now = Date.now();
+      const diff = (now - stopwatchStartTime) + stopwatchElapsed;
+      stopwatchDisplay.textContent = formatStopwatchTime(diff);
+    }
+
+    stopwatchStartBtn.addEventListener('click', () => {
+      if (stopwatchInterval !== null) return;
+      stopwatchStartTime = Date.now();
+      stopwatchInterval = setInterval(updateStopwatch, 10);
+    });
+
+    stopwatchStopBtn.addEventListener('click', () => {
+      if (stopwatchInterval === null) return;
+
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+
+      const now = Date.now();
+      stopwatchElapsed += now - stopwatchStartTime;
+      stopwatchStartTime = null;
+    });
+
+    stopwatchResetBtn.addEventListener('click', () => {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+      stopwatchStartTime = null;
+      stopwatchElapsed = 0;
+      stopwatchDisplay.textContent = '00:00.00';
+    });
+
+    /* =======================
+       COUNTDOWN
+       ======================= */
+    let countdownInterval = null;
+    let countdownEndTime = null; // timestamp millisecondi quando finisce
+    let countdownRunning = false;
+
+    const countdownMinutesInput = document.getElementById('countdownMinutes');
+    const countdownDisplay = document.getElementById('countdownDisplay');
+    const countdownStartBtn = document.getElementById('countdownStart');
+    const countdownStopBtn = document.getElementById('countdownStop');
+    const countdownResetBtn = document.getElementById('countdownReset');
+    const countdownMessage = document.getElementById('countdownMessage');
+    const alarmSound = document.getElementById('alarmSound');
+
+    function formatCountdownTime(ms) {
+      if (ms < 0) ms = 0;
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    function updateCountdown() {
+      const now = Date.now();
+      const remaining = countdownEndTime - now;
+
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        countdownRunning = false;
+        countdownDisplay.textContent = '00:00';
+        countdownMessage.textContent = 'Tempo scaduto!';
+        alarmSound.currentTime = 0;
+        alarmSound.play().catch(() => {
+          countdownMessage.textContent += ' (Clicca per far partire il suono se non lo senti.)';
+        });
+      } else {
+        countdownDisplay.textContent = formatCountdownTime(remaining);
+      }
+    }
+
+    countdownStartBtn.addEventListener('click', () => {
+      if (countdownRunning) return;
+
+      let minutes = parseFloat(countdownMinutesInput.value.replace(',', '.'));
+      if (isNaN(minutes) || minutes < 0) {
+        minutes = 0;
+      }
+
+      const ms = minutes * 60 * 1000;
+
+      if (ms <= 0) {
+        countdownMessage.textContent = 'Inserisci un valore di minuti maggiore di 0.';
+        return;
+      }
+
+      countdownMessage.textContent = '';
+      countdownEndTime = Date.now() + ms;
+      countdownDisplay.textContent = formatCountdownTime(ms);
+
+      countdownRunning = true;
+      countdownInterval = setInterval(updateCountdown, 200);
+    });
+
+    countdownStopBtn.addEventListener('click', () => {
+      if (!countdownRunning) return;
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      countdownRunning = false;
+      countdownMessage.textContent = 'Countdown fermato.';
+    });
+
+    countdownResetBtn.addEventListener('click', () => {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      countdownRunning = false;
+      countdownMessage.textContent = '';
+      const minutes = parseFloat(countdownMinutesInput.value.replace(',', '.')) || 5;
+      const ms = minutes * 60 * 1000;
+      countdownDisplay.textContent = formatCountdownTime(ms);
+    });
+
+    window.addEventListener('load', () => {
+      const minutes = parseFloat(countdownMinutesInput.value) || 5;
+      const ms = minutes * 60 * 1000;
+      countdownDisplay.textContent = formatCountdownTime(ms);
+    });
+  </script>
+</body>
+</html>
