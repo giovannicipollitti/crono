@@ -6,78 +6,86 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <title>Cronometro & Countdown</title>
   <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* niente scroll */
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden; /* niente scroll */
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  background: url('sfondo.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #f5f5f5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: url('sfondo.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between; /* distribuisce alto / centro / basso */
+    }
 
-header {
-  text-align: center;
-  margin-top: 100px;
-  margin-bottom: 50px;
-}
+    /* BANNER IN ALTO */
+    .banner {
+      width: 100%;
+      background: #87CEFA; /* celeste */
+      text-align: center;
+      padding: 8px 0;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #000;
+      flex-shrink: 0;
+    }
 
-header img {
-  max-width: 90px;
-  height: auto;
-}
+    header {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
 
-.container {
-  background: rgba(51, 51, 51, 0.92);
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  width: 90%;
-  max-width: 380px;
-  
-  /* RIMOSSO: flex:1 */
-  /* RIMOSSO: display:flex */
-  /* RIMOSSO: overflow:hidden */
-  
-  box-sizing: border-box;
-}
+    header img {
+      max-width: 120px;
+      height: auto;
+    }
 
+    .container {
+      background: rgba(51, 51, 51, 0.92);
+      padding: 12px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 380px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
 
     h1 {
       text-align: center;
       color: yellow;
       margin: 4px 0 8px 0;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .block {
       border: 1px solid #555;
       border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
       background: #2b2b2b;
       flex-shrink: 0;
     }
 
     .title {
-      font-size: 1rem;
-      margin-bottom: 6px;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
       text-align: center;
       font-weight: bold;
     }
 
     .time-display {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       text-align: center;
-      margin: 6px 0 10px;
+      margin: 4px 0 8px;
       letter-spacing: 2px;
     }
 
@@ -120,9 +128,9 @@ header img {
       justify-content: center;
       align-items: center;
       gap: 6px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       flex-wrap: wrap;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     input[type="number"] {
@@ -138,10 +146,22 @@ header img {
 
     .message {
       text-align: center;
-      margin-top: 6px;
+      margin-top: 4px;
       font-size: 0.8rem;
       color: #ffeb3b;
       min-height: 1.2em;
+    }
+
+    /* FOOTER IN BASSO */
+    footer {
+      width: 100%;
+      background: #87CEFA; /* celeste */
+      text-align: center;
+      padding: 6px 0;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #000;
+      flex-shrink: 0;
     }
 
     /* Piccolo miglioramento se aperta su schermo un po' più grande */
@@ -153,6 +173,8 @@ header img {
   </style>
 </head>
 <body>
+  <div class="banner">BENVENUTO</div>
+
   <header>
     <img src="logo.png" alt="Logo" />
   </header>
@@ -343,5 +365,9 @@ header img {
       countdownDisplay.textContent = formatCountdownTime(ms);
     });
   </script>
+
+  <footer>
+    MADE BY CIPOLLITTI GIOVANNI
+  </footer>
 </body>
 </html>
